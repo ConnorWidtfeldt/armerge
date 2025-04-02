@@ -17,7 +17,6 @@ use regex::Regex;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use tracing::error;
 
 #[derive(Debug)]
 pub struct ArMerger {
@@ -77,11 +76,11 @@ impl ArMerger {
             ArchiveContents::Elf => Box::new(CommonArBuilder::new(output.as_ref())),
             ArchiveContents::MachO => Box::new(MacArBuilder::new(output.as_ref())),
             ArchiveContents::Other => {
-                error!("Input archives contain neither ELF nor Mach-O files, trying to continue with your host toolchain");
+                // error!("Input archives contain neither ELF nor Mach-O files, trying to continue with your host toolchain");
                 arbuilder::host_platform_builder(output.as_ref())
             }
             ArchiveContents::Mixed => {
-                error!("Input archives contain different object file formats, trying to continue with your host toolchain");
+                // error!("Input archives contain different object file formats, trying to continue with your host toolchain");
                 arbuilder::host_platform_builder(output.as_ref())
             }
         })
