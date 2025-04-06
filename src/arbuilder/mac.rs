@@ -4,6 +4,7 @@ use crate::MergeError::ExternalToolLaunchError;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::str::FromStr;
 use tracing::info;
 
 #[derive(Debug)]
@@ -62,12 +63,20 @@ impl MacArBuilder {
                 .join(" ")
         );
 
+        let libtool_path = if let Some(libtool_var) = std::env::var_os("LIBTOOL") {
+            libtool_var
+        } else {
+            OsString::from_str("libtool").unwrap()
+        };
+
+        let libtool_str = libtool_path.to_string_lossy().to_string();
+
         let output =
-            Command::new("libtool")
+            Command::new(libtool_path)
                 .args(&args)
                 .output()
                 .map_err(|e| ExternalToolLaunchError {
-                    tool: "libtool".to_string(),
+                    tool: libtool_str.clone(),
                     inner: e,
                 })?;
         if output.status.success() {
@@ -75,7 +84,7 @@ impl MacArBuilder {
         } else {
             Err(MergeError::ExternalToolError {
                 reason: "Failed to merge object files with `libtool`".to_string(),
-                tool: "libtool".to_string(),
+                tool: libtool_str,
                 args,
                 stdout: String::from_utf8_lossy(&output.stdout).to_string(),
                 stderr: String::from_utf8_lossy(&output.stderr).to_string(),
