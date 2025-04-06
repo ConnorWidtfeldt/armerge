@@ -5,7 +5,7 @@ use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::FromStr;
-use tracing::info;
+use tracing::{debug, info};
 
 #[derive(Debug)]
 pub struct MacArBuilder {
@@ -64,6 +64,7 @@ impl MacArBuilder {
         );
 
         let libtool_path = if let Some(libtool_var) = std::env::var_os("LIBTOOL") {
+            debug!("Using libtool from LIBTOOL environment variable ({})", libtool_var.to_string_lossy());
             libtool_var
         } else {
             OsString::from_str("libtool").unwrap()
